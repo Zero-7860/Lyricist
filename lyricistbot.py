@@ -15,7 +15,7 @@ client = commands.Bot(command_prefix = '$')
 client.remove_command("help")
 @client.event
 async def on_ready():
-  print('Bot is ready!')
+  print('Bot is online !')
 
 
 
@@ -210,24 +210,71 @@ async def quotes(ctx):
     )
     await ctx.channel.send(embed=embed)
 
-#quiz
+rando = random.randint(0,2)
+artist_name=''
+#artist quiz
+song
 @client.command()
-async def quiz(ctx,*arg):
-  #string = ''
-  artist_name=''
-  string= arg
-  for i in string:
-    artist_name = artist_name + " " + i
-  artist_details=api.search_artist(artist_name, max_songs=3)
-  x=random.randint(0,2)
-  song = artist_details.songs.pop(x)
-  embed= discord.Embed(
-    title = 'Welcome to the Quiz !',
-    description=artist_details.songs.artist,
-    #description=song,
-    colour = discord.Colour.random() 
-  )
-  await ctx.channel.send(embed=embed)
+async def quiz(ctx):
+  await ctx.channel.send("How well do you know your favourite artist? Let's see if you can identify some of their best tracks! \n Enter an artist's name:(ex: $art The Weeknd) \n Identify the song from the lyrics:(ex: $name Starboy) : \n")
+@client.command()
+async def art(ctx,*arg):
+    artist_name=''                #empty string to store artist name
+    string = arg
+    for str in string:
+        artist_name = artist_name+ str
+    #artist_name                   #string stored artist name
+    await ctx.channel.send("Please wait for the lyrics....\n")
+    artist = api.search_artist(artist_name, max_songs=3)
+    song = artist.songs.pop(rando)
+    lyrics_list = []
+    if song:
+        url = song.url
+        lyrics = song.lyrics.split("\n")
+        for line in lyrics:
+            if line == '':
+                lyrics.remove(line)
+            else:
+                lyrics_list.append(line)
+    
+    embed= discord.Embed(
+        title = 'Here are the lyrics',
+        description =  '\n'.join(lyrics_list),
+        colour = discord.Colour.random() 
+    )
+
+    await ctx.channel.send(embed=embed)
+
+    await ctx.channel.send('Guess the song using $name [song name] ~ [artist_name]')
+
+@client.command()
+async def name(ctx,*arg):      # $name Viva la vida ~ Coldplay
+    string=''
+    artist_name=''
+    song_name=''
+    
+    string=arg
+    for str in string:
+      if(str == '~'):
+        break
+      song_name = song_name + str + " "
+    #song_name.pop(0)
+    song_= string[string.index('~') : len(string)]
+    for _a in song_ :
+      if(_a == '~'):
+        continue
+      artist_name = artist_name + " " + _a
+
+    artist = api.search_artist(artist_name,max_songs=3)
+    song = artist.songs.pop(rando)
+    name=song.title
+    name_str=''.join(name)
+    
+    song_name=song_name[:-1]
+    if song_name == name_str :
+        await ctx.channel.send("Correct")
+    else:
+        await ctx.channel.send("Incorrect")
 
 
 #for help
